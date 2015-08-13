@@ -7,7 +7,7 @@ use Snappy\Apps\TicketRepliedHandler;
 use Snappy\Apps\TicketWaitingHandler;
 use Snappy\Apps\WallPostHandler;
 
-class App extends BaseApp implements WallPostHandler, IncomingMessageHandler, TicketWaitingHandler, TicketRepliedHandler
+class App extends BaseApp implements WallPostHandler, IncomingMessageHandler, TicketRepliedHandler
 {
 
     /**
@@ -29,7 +29,7 @@ class App extends BaseApp implements WallPostHandler, IncomingMessageHandler, Ti
      *
      * @var string
      */
-    public $notes = '<p>You can create a new <a href="https://besnappy.slack.com/services/new/incoming-webhook" target="_blank">Incoming Webhook</a> on Slack via their custom integrations setup.</p>';
+    public $notes = '<p>You can create a new <a href="https://my.slack.com/services/new/incoming-webhook" target="_blank">Incoming Webhook</a> on Slack via their custom integrations setup.</p>';
 
     /**
      * The application's icon filename.
@@ -74,7 +74,6 @@ class App extends BaseApp implements WallPostHandler, IncomingMessageHandler, Ti
 
         array( 'name' => 'new_ticket_notify', 'label' => 'New Tickets', 'type' => 'checkbox', 'help' => 'Notify on new inbound tickets?' ),
         array( 'name' => 'replied_ticket_notify', 'label' => 'Replied Tickets', 'type' => 'checkbox', 'help' => 'Notify on replied to tickets?' ),
-        array( 'name' => 'waiting_ticket_notify', 'label' => 'Waiting Tickets', 'type' => 'checkbox', 'help' => 'Notify on replied to tickets?' ),
         array( 'name' => 'wall_notify', 'label' => 'Wall', 'type' => 'checkbox', 'help' => 'Notify on new wall posts?' ),
     );
 
@@ -91,7 +90,7 @@ class App extends BaseApp implements WallPostHandler, IncomingMessageHandler, Ti
         {
             $this->getClient()->send(
                 '*New Wall Post* by ' . $wall[ 'staff' ][ 'first_name' ] . ' ' . $wall[ 'staff' ][ 'last_name' ] . PHP_EOL .
-                strip_tags( $wall[ 'content' ] ) . PHP_EOL . 'https://app.besnappy.com/#wall'
+                strip_tags( $wall[ 'content' ] ) . ' - https://app.besnappy.com/#wall'
             );
         }
     }
@@ -109,7 +108,11 @@ class App extends BaseApp implements WallPostHandler, IncomingMessageHandler, Ti
         {
             $url = 'https://app.besnappy.com/#ticket/' . $message[ 'ticket' ][ 'id' ];
 
-            $this->getClient()->send( '*' . strip_tags( $message[ 'ticket' ][ 'default_subject' ] ) . '*' . PHP_EOL . strip_tags( $message[ 'ticket' ][ 'summary' ] ) . PHP_EOL . $url );
+            $this->getClient()->send(
+                '*New Ticket* by ' . $message[ 'ticket' ][ 'opener' ][ 'value' ] . PHP_EOL .
+                '*' . strip_tags( $message[ 'ticket' ][ 'default_subject' ] ) . '*' . PHP_EOL .
+                strip_tags( $message[ 'ticket' ][ 'summary' ] ) . ' - ' . $url
+            );
         }
     }
 
@@ -126,24 +129,11 @@ class App extends BaseApp implements WallPostHandler, IncomingMessageHandler, Ti
         {
             $url = 'https://app.besnappy.com/#ticket/' . $ticket[ 'id' ];
 
-            $this->getClient()->send( '*' . strip_tags( $ticket[ 'default_subject' ] ) . '*' . PHP_EOL . strip_tags( $ticket[ 'summary' ] ) . PHP_EOL . $url );
-        }
-    }
-
-    /**
-     * Handle a ticket with a status that is now "waiting".
-     *
-     * @param  array $ticket
-     *
-     * @return void
-     */
-    public function handleTicketWaiting( array $ticket )
-    {
-        if( $this->config[ 'waiting_ticket_notify' ] )
-        {
-            $url = 'https://app.besnappy.com/#ticket/' . $ticket[ 'id' ];
-
-            $this->getClient()->send( '*' . strip_tags( $ticket[ 'default_subject' ] ) . '*' . PHP_EOL . strip_tags( $ticket[ 'summary' ] ) . PHP_EOL . $url );
+            $this->getClient()->send(
+                '*Replied to Ticket*' . PHP_EOL .
+                '*' . strip_tags( $ticket[ 'default_subject' ] ) . '*' . PHP_EOL .
+                strip_tags( $ticket[ 'summary' ] ) . ' - ' . $url
+            );
         }
     }
 
@@ -164,3 +154,4 @@ class App extends BaseApp implements WallPostHandler, IncomingMessageHandler, Ti
         );
     }
 }
+
