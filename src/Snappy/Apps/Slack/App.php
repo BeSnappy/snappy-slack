@@ -147,7 +147,7 @@ class App extends BaseApp implements WallPostHandler, IncomingMessageHandler, Ti
         return new \Maknz\Slack\Client(
             $this->config[ 'endpoint' ], array(
                 'username'       => 'SnappyBot',
-                'channel'        => $this->config[ 'channel' ],
+                'channel'        => trim( $this->config[ 'channel' ] ),
                 'icon'           => 'https://besnappy.com/images/bot.png',
                 'allow_markdown' => true
             )
